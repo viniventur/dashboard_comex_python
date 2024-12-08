@@ -1,13 +1,12 @@
 import pandas as pd
+import streamlit as st
 import requests
 import warnings
 from datetime import datetime
 warnings.filterwarnings('ignore')
 
-
-def get_comexstat():
-
-
+#@st.cache_data
+def get_comexstat_uf(uf):
     # Obtém o ano e mês atuais
     data_atual = datetime.now()
     ano_atual = data_atual.year
@@ -24,13 +23,13 @@ def get_comexstat():
             "from": "2020-01",
             "to": periodo_atual
         },
-            "filters": [
-        {
-            "filter": "state",
-            "values": [27]
-        }
-    ],
-        "details": ["state", "chapter"],
+        "filters": [
+            {
+                "filter": "state",
+                "values": [uf]
+            }
+        ],
+        "details": ["state", "chapter", 'country'],
         "metrics": ["metricFOB", "metricKG"]
     }
     headers = {
@@ -54,11 +53,26 @@ def get_comexstat():
         if response.status_code == 200:
             # Normaliza os dados recebidos em formato JSON e adiciona a coluna 'flow'
             df = pd.json_normalize(response.json()['data']['list'])
-            df['flow'] = flow  # Marca o fluxo correspondente
-            # Concatena ao DataFrame final
-            df_comexstat = pd.concat([df_comexstat, df], axis=0, ignore_index=True)
+            if not df.empty:
+                df['Fluxo'] = flow  # Marca o fluxo correspondente
+                # Concatena ao DataFrame final
+                df_comexstat = pd.concat([df_comexstat, df], axis=0, ignore_index=True)
         else:
-            print(f"Erro na requisição para o fluxo '{flow}': {response.status_code}")
+            return f"Erro na requisição ao COMEXSTAT: {response.status_code}"
 
-    # Exibir o DataFrame final
+    # Verifica se o DataFrame final está vazio
+    if df_comexstat.empty:
+        return f"Nenhum dado foi retornado pelo COMEXSTAT. Verifique os parâmetros ou tente novamente mais tarde. Status: {response.status_code}"
+
+    # Retorna o DataFrame final
     return df_comexstat
+
+def metadados_uf_comexstat():
+
+    url = "https://api-comexstat.mdic.gov.br/tables/uf"
+
+    response = requests.get(url, verify=False)
+
+    df_uf = pd.json_normalize(response.json()['data'])
+    
+    return df_uf
