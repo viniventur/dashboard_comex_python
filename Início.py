@@ -4,6 +4,7 @@ import pandas as pd
 import warnings
 warnings.filterwarnings('ignore')
 from api_comexstat import *
+from SBC_AL import *
 
 st.set_page_config(layout="wide")
 
@@ -29,6 +30,6 @@ with st.spinner('Aguardando COMEXSTAT...'):
     st.write(df_comexstat)
     st.write(metadados_uf_comexstat())
 
-    st.line_chart(data=df_comexstat, x='Período', y='metricFOB')
+    st.plotly_chart(fig_sbc)
 
 st.header("Pré-tratamento")
