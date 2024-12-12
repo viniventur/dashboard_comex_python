@@ -5,7 +5,7 @@ import warnings
 from datetime import datetime
 warnings.filterwarnings('ignore')
 
-#@st.cache_data
+@st.cache_data
 def get_comexstat_uf(uf):
     # Obtém o ano e mês atuais
     data_atual = datetime.now()
@@ -67,6 +67,7 @@ def get_comexstat_uf(uf):
     # Retorna o DataFrame final
     return df_comexstat
 
+@st.cache_data
 def metadados_uf_comexstat():
 
     url = "https://api-comexstat.mdic.gov.br/tables/uf"
